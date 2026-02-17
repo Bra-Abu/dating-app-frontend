@@ -99,7 +99,12 @@ const Login = () => {
       }
     } catch (error) {
       console.error('Error verifying OTP:', error);
-      toast.error('Invalid OTP. Please try again.');
+      if (error.response?.status === 404 && error.response?.data?.requiresRegistration) {
+        toast.error('Phone not registered. Please register with an invite code first.');
+        navigate('/register');
+      } else {
+        toast.error('Invalid OTP. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
