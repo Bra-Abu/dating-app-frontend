@@ -28,15 +28,36 @@ const PendingProfiles = () => {
   const { data: profiles, isLoading } = useQuery({
     queryKey: ['admin-pending-profiles'],
     queryFn: async () => {
-      const response = await api.get('/admin/pending-profiles');
-      return response.data.profiles;
+      const response = await api.get('/admin/profiles/pending');
+      return response.data.data.map(p => ({
+        id: p.id,
+        userId: p.user_id,
+        firstName: p.first_name,
+        lastName: p.last_name,
+        gender: p.gender,
+        dateOfBirth: p.date_of_birth,
+        age: p.date_of_birth ? Math.floor((new Date() - new Date(p.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
+        bio: p.bio,
+        religion: p.religion,
+        denomination: p.denomination,
+        tribe: p.tribe,
+        city: p.city,
+        country: p.country,
+        height: p.height,
+        occupation: p.occupation,
+        education: p.education,
+        maritalStatus: p.marital_status,
+        photoUrls: p.photo_urls || [],
+        phoneNumber: p.phone_number,
+        createdAt: p.created_at,
+      }));
     },
   });
 
   // Approve profile mutation
   const approveMutation = useMutation({
     mutationFn: async (profileId) => {
-      await api.post(`/admin/approve-profile/${profileId}`);
+      await api.post(`/admin/profiles/${profileId}/approve`);
     },
     onSuccess: () => {
       toast.success('Profile approved successfully');
@@ -52,7 +73,7 @@ const PendingProfiles = () => {
   // Reject profile mutation
   const rejectMutation = useMutation({
     mutationFn: async ({ profileId, reason }) => {
-      await api.post(`/admin/reject-profile/${profileId}`, { reason });
+      await api.post(`/admin/profiles/${profileId}/reject`, { reason });
     },
     onSuccess: () => {
       toast.success('Profile rejected');

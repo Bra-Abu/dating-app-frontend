@@ -122,9 +122,9 @@ const Register = () => {
         lastName: formData.lastName.trim(),
       });
 
-      toast.success('Registration successful! Waiting for approval.');
+      toast.success('Registration successful! Please create your profile.');
       await refreshUserData();
-      navigate('/pending-approval');
+      navigate('/create-profile');
     } catch (error) {
       console.error('Error registering:', error);
       toast.error(error.response?.data?.message || 'Registration failed');
