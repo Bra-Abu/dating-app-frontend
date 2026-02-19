@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../../config/firebase';
+import { useAuth } from '../../contexts/AuthContext';
 import api from '../../config/api';
 import AuthLayout from '../../layouts/AuthLayout';
 import Input from '../../components/common/Input';
@@ -10,6 +11,7 @@ import toast from 'react-hot-toast';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { refreshUserData } = useAuth();
   const [step, setStep] = useState('invite'); // 'invite', 'phone', 'otp', 'details'
   const [formData, setFormData] = useState({
     inviteCode: '',
@@ -121,6 +123,7 @@ const Register = () => {
       });
 
       toast.success('Registration successful! Waiting for approval.');
+      await refreshUserData();
       navigate('/pending-approval');
     } catch (error) {
       console.error('Error registering:', error);

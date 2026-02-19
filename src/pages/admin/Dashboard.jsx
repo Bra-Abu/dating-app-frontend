@@ -17,8 +17,19 @@ const Dashboard = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const response = await api.get('/admin/statistics');
-      return response.data;
+      const response = await api.get('/admin/stats/overview');
+      const d = response.data.data;
+      return {
+        pendingUsers: d?.users?.pending || 0,
+        totalUsers: d?.users?.total || 0,
+        activeUsers: d?.users?.active || 0,
+        pendingProfiles: d?.profiles?.pending || 0,
+        pendingVerifications: d?.verification?.pending || 0,
+        openReports: d?.reports?.pending || 0,
+        totalMatches: d?.matching?.totalMatches || 0,
+        verificationRate: d?.verification?.rate || 0,
+        recentActivity: [],
+      };
     },
   });
 

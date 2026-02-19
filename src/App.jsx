@@ -154,14 +154,10 @@ function App() {
                   }
                 />
 
-                {/* Pending Approval */}
+                {/* Pending Approval - accessible to logged in users regardless of status */}
                 <Route
                   path="/pending-approval"
-                  element={
-                    <ProtectedRoute requireActive={false}>
-                      <PendingApproval />
-                    </ProtectedRoute>
-                  }
+                  element={<PendingApproval />}
                 />
 
                 {/* Profile Routes */}
