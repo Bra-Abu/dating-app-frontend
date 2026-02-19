@@ -44,6 +44,7 @@ import UploadID from './pages/verification/UploadID';
 import ReportUser from './pages/reports/ReportUser';
 
 // Admin Pages
+import AdminLogin from './pages/admin/AdminLogin';
 import Dashboard from './pages/admin/Dashboard';
 import PendingUsers from './pages/admin/PendingUsers';
 import PendingProfiles from './pages/admin/PendingProfiles';
@@ -312,6 +313,9 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+
+                {/* Admin Login - separate from user login */}
+                <Route path="/admin/login" element={<AdminLogin />} />
 
                 {/* Admin Routes */}
                 <Route
