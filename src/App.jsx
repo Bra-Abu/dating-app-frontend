@@ -79,7 +79,7 @@ const ProtectedRoute = ({ children, requireActive = true, requireProfile = false
   }
 
   if (!currentUser) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={adminOnly ? "/admin/login" : "/login"} replace />;
   }
 
   if (adminOnly && !isAdmin) {
