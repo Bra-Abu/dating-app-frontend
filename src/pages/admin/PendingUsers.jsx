@@ -25,15 +25,25 @@ const PendingUsers = () => {
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-pending-users'],
     queryFn: async () => {
-      const response = await api.get('/admin/pending-users');
-      return response.data.users;
+      const response = await api.get('/admin/users/pending');
+      return response.data.data.map(u => ({
+        id: u.id,
+        firstName: u.first_name || '',
+        lastName: u.last_name || '',
+        phoneNumber: u.phone_number,
+        phoneVerified: true,
+        gender: u.gender,
+        createdAt: u.created_at,
+        invitedBy: u.inviter_phone,
+        religion: u.religion,
+      }));
     },
   });
 
   // Approve user mutation
   const approveMutation = useMutation({
     mutationFn: async (userId) => {
-      await api.post(`/admin/approve-user/${userId}`);
+      await api.post(`/admin/users/${userId}/approve`);
     },
     onSuccess: () => {
       toast.success('User approved successfully');
@@ -48,7 +58,7 @@ const PendingUsers = () => {
   // Reject user mutation
   const rejectMutation = useMutation({
     mutationFn: async ({ userId, reason }) => {
-      await api.post(`/admin/reject-user/${userId}`, { reason });
+      await api.post(`/admin/users/${userId}/reject`, { reason });
     },
     onSuccess: () => {
       toast.success('User rejected');
