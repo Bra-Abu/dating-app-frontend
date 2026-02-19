@@ -21,17 +21,17 @@ const Browse = () => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['matchSuggestions'],
     queryFn: async () => {
-      const response = await api.get('/matching/suggestions', {
+      const response = await api.get('/matches/suggestions', {
         params: { limit: 20 },
       });
-      return response.data.suggestions;
+      return response.data.data || [];
     },
   });
 
   // Like mutation
   const likeMutation = useMutation({
-    mutationFn: async (profileId) => {
-      const response = await api.post(`/matching/like/${profileId}`);
+    mutationFn: async (userId) => {
+      const response = await api.post(`/matches/like/${userId}`);
       // Check rate limit headers
       const remaining = response.headers['x-ratelimit-remaining'];
       const limit = response.headers['x-ratelimit-limit'];
@@ -57,8 +57,8 @@ const Browse = () => {
 
   // Pass mutation
   const passMutation = useMutation({
-    mutationFn: async (profileId) => {
-      const response = await api.post(`/matching/pass/${profileId}`);
+    mutationFn: async (userId) => {
+      const response = await api.post(`/matches/pass/${userId}`);
       return response.data;
     },
     onSuccess: () => {
@@ -69,9 +69,10 @@ const Browse = () => {
     },
   });
 
-  const profiles = data || [];
-  const currentProfile = profiles[currentIndex];
-  const hasMoreProfiles = currentIndex < profiles.length - 1;
+  const suggestions = data || [];
+  const currentSuggestion = suggestions[currentIndex];
+  const currentProfile = currentSuggestion ? { ...currentSuggestion.profile, userId: currentSuggestion.userId, compatibility: currentSuggestion.compatibility } : null;
+  const hasMoreProfiles = currentIndex < suggestions.length - 1;
 
   const moveToNext = () => {
     if (hasMoreProfiles) {
@@ -87,21 +88,21 @@ const Browse = () => {
     if (!currentProfile) return;
 
     if (direction === 'right') {
-      likeMutation.mutate(currentProfile.id);
+      likeMutation.mutate(currentProfile.userId);
     } else {
-      passMutation.mutate(currentProfile.id);
+      passMutation.mutate(currentProfile.userId);
     }
   };
 
   const handleLike = () => {
     if (currentProfile) {
-      likeMutation.mutate(currentProfile.id);
+      likeMutation.mutate(currentProfile.userId);
     }
   };
 
   const handlePass = () => {
     if (currentProfile) {
-      passMutation.mutate(currentProfile.id);
+      passMutation.mutate(currentProfile.userId);
     }
   };
 
