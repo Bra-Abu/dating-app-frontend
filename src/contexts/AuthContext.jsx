@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
     refreshUserData,
     refreshProfile,
     isAuthenticated: !!currentUser,
-    isAdmin: currentUser?.accountType === 'admin',
+    isAdmin: currentUser?.accountType === 'admin' || currentUser?.accountType === 'super_admin',
     isActive: currentUser?.status === 'active',
     isPending: currentUser?.status === 'pending_approval',
     hasProfile: !!userProfile,

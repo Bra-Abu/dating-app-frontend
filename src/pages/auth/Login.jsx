@@ -80,16 +80,16 @@ const Login = () => {
 
       // Verify with backend
       const response = await api.post('/auth/verify', { idToken });
-      const { user } = response.data;
+      const data = response.data.data;
 
       // Navigate based on account status
-      if (user.accountStatus === 'pending_approval') {
+      if (data.status === 'pending_approval') {
         navigate('/pending-approval');
-      } else if (user.accountStatus === 'active') {
-        if (!user.profileId) {
-          navigate('/create-profile');
-        } else if (user.role === 'admin') {
+      } else if (data.status === 'active') {
+        if (data.accountType === 'admin' || data.accountType === 'super_admin') {
           navigate('/admin/dashboard');
+        } else if (!data.hasProfile) {
+          navigate('/create-profile');
         } else {
           navigate('/browse');
         }
