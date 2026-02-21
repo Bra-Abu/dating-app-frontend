@@ -16,8 +16,8 @@ const Matches = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['matches'],
     queryFn: async () => {
-      const response = await api.get('/matching/matches');
-      return response.data.matches;
+      const response = await api.get('/matches/mutual');
+      return response.data.data;
     },
   });
 
@@ -46,7 +46,7 @@ const Matches = () => {
         {matches.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {matches.map((match) => (
-              <MatchCard key={match.id} match={match} navigate={navigate} />
+              <MatchCard key={match.matchId} match={match} navigate={navigate} />
             ))}
           </div>
         ) : (
@@ -74,8 +74,8 @@ const Matches = () => {
 };
 
 const MatchCard = ({ match, navigate }) => {
-  const profile = match.profile;
-  const mainPhoto = profile.photoUrls?.[0];
+  const profile = match.user;
+  const mainPhoto = profile?.photoUrls?.[0];
   const photoUrl = mainPhoto ? getImageUrl(mainPhoto) : null;
 
   return (
@@ -122,10 +122,10 @@ const MatchCard = ({ match, navigate }) => {
 
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">
-              Matched {formatRelativeTime(match.createdAt)}
+              Matched {formatRelativeTime(match.matchedAt)}
             </span>
             <button
-              onClick={() => navigate(`/messages/${match.id}`)}
+              onClick={() => navigate(`/messages/${match.matchId}`)}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 group-hover:underline"
             >
               <ChatBubbleLeftRightIcon className="h-4 w-4" />

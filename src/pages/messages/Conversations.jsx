@@ -14,7 +14,7 @@ const Conversations = () => {
     queryKey: ['conversations'],
     queryFn: async () => {
       const response = await api.get('/messages/conversations');
-      return response.data.conversations;
+      return response.data.data;
     },
     refetchInterval: 10000, // Poll every 10 seconds
   });
@@ -24,15 +24,15 @@ const Conversations = () => {
   // Filter conversations by search query
   const filteredConversations = conversations.filter((conv) => {
     if (!searchQuery) return true;
-    const otherUser = conv.otherUser;
-    const fullName = `${otherUser.firstName} ${otherUser.lastName}`.toLowerCase();
+    const otherUser = conv.user;
+    const fullName = `${otherUser?.firstName || ''} ${otherUser?.lastName || ''}`.toLowerCase();
     return fullName.includes(searchQuery.toLowerCase());
   });
 
   // Sort by last message time (most recent first)
   const sortedConversations = [...filteredConversations].sort((a, b) => {
-    const timeA = a.lastMessage?.createdAt || a.createdAt;
-    const timeB = b.lastMessage?.createdAt || b.createdAt;
+    const timeA = a.lastMessageAt || a.matchedAt;
+    const timeB = b.lastMessageAt || b.matchedAt;
     return new Date(timeB) - new Date(timeA);
   });
 

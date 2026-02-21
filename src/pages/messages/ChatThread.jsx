@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../config/api';
-import { useAuth } from '../../contexts/AuthContext';
 import UserLayout from '../../layouts/UserLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import MessageBubble from '../../components/messages/MessageBubble';
@@ -21,17 +20,17 @@ import { getImageUrl } from '../../utils/imageUtils';
 const ChatThread = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
   const queryClient = useQueryClient();
   const messagesEndRef = useRef(null);
   const [showGuardianAlert, setShowGuardianAlert] = useState(false);
 
-  // Fetch match details
+  // Fetch match details from mutual matches list
   const { data: matchData } = useQuery({
     queryKey: ['match', matchId],
     queryFn: async () => {
-      const response = await api.get(`/matching/match/${matchId}`);
-      return response.data.match;
+      const response = await api.get('/matches/mutual');
+      const match = (response.data.data || []).find((m) => m.matchId === matchId);
+      return match || null;
     },
   });
 
@@ -39,22 +38,22 @@ const ChatThread = () => {
   const { data: messagesData, isLoading } = useQuery({
     queryKey: ['messages', matchId],
     queryFn: async () => {
-      const response = await api.get(`/messages/${matchId}`);
+      const response = await api.get(`/messages/conversation/${matchId}`);
       return response.data;
     },
     refetchInterval: 5000, // Poll every 5 seconds
   });
 
-  const messages = messagesData?.messages || [];
-  const otherUser = matchData?.otherUser;
-  const guardianInfo = matchData?.guardianInfo;
+  const messages = messagesData?.data || [];
+  const otherUser = matchData?.user;
 
-  // Show guardian alert if applicable
+  // Show guardian alert if first message in conversation has guardian_alert type
   useEffect(() => {
-    if (guardianInfo && messages.length === 0) {
+    const hasGuardianAlert = messages.some((m) => m.messageType === 'guardian_alert');
+    if (hasGuardianAlert && messages.length <= 2) {
       setShowGuardianAlert(true);
     }
-  }, [guardianInfo, messages.length]);
+  }, [messages]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -64,7 +63,10 @@ const ChatThread = () => {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content) => {
-      const response = await api.post(`/messages/${matchId}`, { content });
+      const response = await api.post('/messages/send', {
+        receiverId: otherUser?.userId,
+        message: content,
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -72,7 +74,7 @@ const ChatThread = () => {
       queryClient.invalidateQueries(['conversations']);
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to send message');
+      toast.error(error.response?.data?.error || 'Failed to send message');
     },
   });
 
@@ -86,27 +88,27 @@ const ChatThread = () => {
       queryClient.invalidateQueries(['messages', matchId]);
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to delete message');
+      toast.error(error.response?.data?.error || 'Failed to delete message');
     },
   });
 
   // Block user mutation
   const blockMutation = useMutation({
     mutationFn: async () => {
-      await api.post(`/blocking/block/${otherUser.id}`);
+      await api.post(`/reports/blocks/block/${otherUser?.userId}`);
     },
     onSuccess: () => {
       toast.success('User blocked successfully');
       navigate('/messages');
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to block user');
+      toast.error(error.response?.data?.error || 'Failed to block user');
     },
   });
 
   // Report user
   const handleReport = () => {
-    navigate(`/report/${otherUser.id}`, {
+    navigate(`/report/${otherUser?.userId}`, {
       state: { from: `/messages/${matchId}` },
     });
   };
@@ -125,9 +127,8 @@ const ChatThread = () => {
     );
   }
 
-  const photoUrl = otherUser.profilePhotoUrl
-    ? getImageUrl(otherUser.profilePhotoUrl)
-    : null;
+  const mainPhoto = otherUser?.photoUrls?.[0];
+  const photoUrl = mainPhoto ? getImageUrl(mainPhoto) : null;
 
   return (
     <UserLayout>
@@ -142,31 +143,28 @@ const ChatThread = () => {
               <ArrowLeftIcon className="h-5 w-5" />
             </button>
 
-            <div
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => navigate(`/profile/${otherUser.id}`)}
-            >
+            <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
                 {photoUrl ? (
                   <img
                     src={photoUrl}
-                    alt={otherUser.firstName}
+                    alt={otherUser?.firstName}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                     <span className="text-lg font-semibold">
-                      {otherUser.firstName[0]}
+                      {otherUser?.firstName?.[0] || '?'}
                     </span>
                   </div>
                 )}
               </div>
               <div>
                 <h2 className="font-semibold text-gray-900">
-                  {otherUser.firstName}, {otherUser.age}
+                  {otherUser?.firstName}, {otherUser?.age}
                 </h2>
                 <p className="text-sm text-gray-600">
-                  {otherUser.city}, {otherUser.stateOfOrigin}
+                  {otherUser?.city}
                 </p>
               </div>
             </div>
@@ -209,9 +207,9 @@ const ChatThread = () => {
         </div>
 
         {/* Guardian Alert */}
-        {showGuardianAlert && guardianInfo && (
+        {showGuardianAlert && (
           <div className="p-4">
-            <GuardianAlert guardianInfo={guardianInfo} />
+            <GuardianAlert />
           </div>
         )}
 
@@ -223,7 +221,7 @@ const ChatThread = () => {
                 <MessageBubble
                   key={message.id}
                   message={message}
-                  isOwn={message.senderId === currentUser.id}
+                  isOwn={message.isMine}
                 />
               ))}
               <div ref={messagesEndRef} />

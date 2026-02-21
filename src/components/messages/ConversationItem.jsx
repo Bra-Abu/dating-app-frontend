@@ -4,13 +4,12 @@ import { formatRelativeTime, truncateText } from '../../utils/formatters';
 
 const ConversationItem = ({ conversation }) => {
   const navigate = useNavigate();
-  const otherUser = conversation.otherUser;
-  const lastMessage = conversation.lastMessage;
+  const otherUser = conversation.user;
+  const lastMessage = conversation.lastMessage; // plain string
   const unreadCount = conversation.unreadCount || 0;
 
-  const photoUrl = otherUser.profilePhotoUrl
-    ? getImageUrl(otherUser.profilePhotoUrl)
-    : null;
+  const mainPhoto = otherUser?.photoUrls?.[0];
+  const photoUrl = mainPhoto ? getImageUrl(mainPhoto) : null;
 
   return (
     <div
@@ -23,13 +22,13 @@ const ConversationItem = ({ conversation }) => {
           {photoUrl ? (
             <img
               src={photoUrl}
-              alt={otherUser.firstName}
+              alt={otherUser?.firstName}
               className="w-full h-full object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
               <span className="text-xl font-semibold">
-                {otherUser.firstName[0]}
+                {otherUser?.firstName?.[0] || '?'}
               </span>
             </div>
           )}
@@ -45,11 +44,11 @@ const ConversationItem = ({ conversation }) => {
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline justify-between mb-1">
           <h3 className="font-semibold text-gray-900 truncate">
-            {otherUser.firstName}, {otherUser.age}
+            {otherUser?.firstName}, {otherUser?.age}
           </h3>
-          {lastMessage && (
+          {conversation.lastMessageAt && (
             <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
-              {formatRelativeTime(lastMessage.createdAt)}
+              {formatRelativeTime(conversation.lastMessageAt)}
             </span>
           )}
         </div>
@@ -60,9 +59,7 @@ const ConversationItem = ({ conversation }) => {
               unreadCount > 0 ? 'font-medium text-gray-900' : 'text-gray-600'
             }`}
           >
-            {lastMessage.type === 'guardian_alert'
-              ? '🔔 Guardian Alert'
-              : truncateText(lastMessage.content, 50)}
+            {truncateText(lastMessage, 50)}
           </p>
         ) : (
           <p className="text-sm text-gray-500 italic">No messages yet</p>

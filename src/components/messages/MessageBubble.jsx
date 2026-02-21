@@ -2,14 +2,14 @@ import { formatTime } from '../../utils/formatters';
 import { CheckIcon } from '@heroicons/react/24/outline';
 
 const MessageBubble = ({ message, isOwn }) => {
-  const isGuardianAlert = message.type === 'guardian_alert';
+  const isGuardianAlert = message.messageType === 'guardian_alert';
 
   if (isGuardianAlert) {
     return (
       <div className="flex justify-center my-4">
         <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 max-w-md">
           <p className="text-sm text-blue-800 text-center">
-            ℹ️ {message.content}
+            ℹ️ {message.messageText}
           </p>
         </div>
       </div>
@@ -25,7 +25,7 @@ const MessageBubble = ({ message, isOwn }) => {
             : 'bg-gray-200 text-gray-900 rounded-tl-sm'
         }`}
       >
-        <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>
+        <p className="text-sm break-words whitespace-pre-wrap">{message.messageText}</p>
         <div
           className={`flex items-center gap-1 mt-1 text-xs ${
             isOwn ? 'text-white/70 justify-end' : 'text-gray-500'

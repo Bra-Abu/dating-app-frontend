@@ -12,16 +12,17 @@ const MatchHistory = () => {
 
   // Fetch match history
   const { data, isLoading } = useQuery({
-    queryKey: ['matchHistory', activeTab],
+    queryKey: ['matchHistory'],
     queryFn: async () => {
-      const response = await api.get('/matching/history', {
-        params: { type: activeTab },
-      });
-      return response.data.history;
+      const response = await api.get('/matches/history');
+      return response.data.data;
     },
   });
 
-  const history = data || [];
+  const allHistory = data || [];
+  const history = allHistory.filter((item) =>
+    activeTab === 'liked' ? item.myAction === 'liked' : item.myAction === 'passed'
+  );
 
   return (
     <UserLayout>
@@ -65,7 +66,7 @@ const MatchHistory = () => {
         ) : history.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {history.map((item) => (
-              <HistoryCard key={item.id} item={item} type={activeTab} />
+              <HistoryCard key={item.matchId} item={item} type={activeTab} />
             ))}
           </div>
         ) : (
@@ -83,8 +84,8 @@ const MatchHistory = () => {
 };
 
 const HistoryCard = ({ item, type }) => {
-  const profile = item.profile;
-  const mainPhoto = profile.blurredPhotoUrls?.[0];
+  const profile = item.user;
+  const mainPhoto = profile?.photoUrls?.[0];
   const photoUrl = mainPhoto ? getImageUrl(mainPhoto) : null;
 
   return (
@@ -94,7 +95,7 @@ const HistoryCard = ({ item, type }) => {
         {photoUrl ? (
           <img
             src={photoUrl}
-            alt={profile.firstName}
+            alt={profile?.firstName}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -120,7 +121,7 @@ const HistoryCard = ({ item, type }) => {
         {/* Name */}
         <div className="absolute bottom-3 left-3 right-3">
           <h3 className="text-white font-semibold text-lg">
-            {profile.firstName}, {profile.age}
+            {profile?.firstName} {profile?.lastName}
           </h3>
         </div>
       </div>
@@ -128,17 +129,13 @@ const HistoryCard = ({ item, type }) => {
       {/* Info */}
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600">
-            {profile.city}, {profile.stateOfOrigin}
-          </span>
+          {item.isMutualMatch && (
+            <span className="text-xs text-green-600 font-medium">Mutual Match!</span>
+          )}
           {item.compatibilityScore !== undefined && (
             <CompatibilityScore score={item.compatibilityScore} size="sm" showLabel={false} />
           )}
         </div>
-
-        <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-          {profile.occupation}
-        </p>
 
         <p className="text-xs text-gray-500">
           {formatRelativeTime(item.createdAt)}
