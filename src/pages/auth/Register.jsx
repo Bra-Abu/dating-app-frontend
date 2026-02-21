@@ -53,7 +53,7 @@ const Register = () => {
       toast.success('Invite code verified');
     } catch (error) {
       console.error('Error validating invite code:', error);
-      toast.error(error.response?.data?.message || 'Invalid invite code');
+      toast.error(error.response?.data?.error || error.response?.data?.message || 'Invalid invite code');
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,7 @@ const Register = () => {
       navigate('/create-profile');
     } catch (error) {
       console.error('Error registering:', error);
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error(error.response?.data?.error || error.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -151,7 +151,7 @@ const Register = () => {
             placeholder="ABCD1234"
             value={formData.inviteCode}
             onChange={handleChange}
-            maxLength={8}
+            maxLength={9}
             required
           />
 
