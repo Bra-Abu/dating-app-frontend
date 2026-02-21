@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, browserSessionPersistence, setPersistence } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,5 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication
+// Session persistence: user is logged out when tab/browser is closed
 export const auth = getAuth(app);
+setPersistence(auth, browserSessionPersistence);
 export default app;

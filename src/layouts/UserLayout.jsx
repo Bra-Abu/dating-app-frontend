@@ -95,7 +95,7 @@ const UserLayout = ({ children }) => {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-        <div className="grid grid-cols-5 gap-1 px-2 py-2">
+        <div className="grid grid-cols-6 gap-1 px-2 py-2">
           {navLinks.map((link) => (
             <Link
               key={link.path}
@@ -115,6 +115,13 @@ const UserLayout = ({ children }) => {
               )}
             </Link>
           ))}
+          <button
+            onClick={handleSignOut}
+            className="flex flex-col items-center justify-center py-2 rounded-lg transition-colors text-gray-600 hover:text-red-600"
+          >
+            <ArrowRightOnRectangleIcon className="h-6 w-6" />
+            <span className="text-xs mt-1">Logout</span>
+          </button>
         </div>
       </nav>
 
