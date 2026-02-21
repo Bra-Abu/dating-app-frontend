@@ -51,6 +51,7 @@ import PendingProfiles from './pages/admin/PendingProfiles';
 import Verifications from './pages/admin/Verifications';
 import AdminReports from './pages/admin/AdminReports';
 import Statistics from './pages/admin/Statistics';
+import AdminInvites from './pages/admin/AdminInvites';
 
 // Other Pages
 import NotFound from './pages/NotFound';
@@ -359,6 +360,14 @@ function App() {
                   element={
                     <ProtectedRoute adminOnly={true}>
                       <Statistics />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/invites"
+                  element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminInvites />
                     </ProtectedRoute>
                   }
                 />

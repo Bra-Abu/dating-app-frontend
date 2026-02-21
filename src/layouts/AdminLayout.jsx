@@ -32,7 +32,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/verifications', label: 'Verifications', icon: ShieldCheckIcon },
     { path: '/admin/reports', label: 'Reports', icon: FlagIcon },
     { path: '/admin/statistics', label: 'Statistics', icon: ChartBarIcon },
-    { path: '/settings/invites', label: 'Invite Codes', icon: TicketIcon },
+    { path: '/admin/invites', label: 'Invite Codes', icon: TicketIcon },
   ];
 
   const isActive = (path) => location.pathname === path;
