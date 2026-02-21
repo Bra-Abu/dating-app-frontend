@@ -144,11 +144,11 @@ const Browse = () => {
         </div>
 
         {/* Swipe Area */}
-        {profiles.length > 0 ? (
+        {suggestions.length > 0 ? (
           <>
             <div className="relative h-[600px] mb-6">
               {/* Stack of cards - show current and next */}
-              {profiles.slice(currentIndex, currentIndex + 3).map((profile, index) => (
+              {suggestions.slice(currentIndex, currentIndex + 3).map((profile, index) => (
                 <div
                   key={profile.id}
                   className="absolute inset-0"
